@@ -6,7 +6,6 @@
 # Email : hyfang@pku.edu.cn
 # Date  : 13MAY2016
 #-------------------------------------------------------------------------------
-require(huge);
 #-------------------------------------------------------------------------------
 gcoda <- function(x, counts = F, pseudo = 0.5, lambda.min.ratio = 1e-4, 
                   nlambda = 15, ebic.gamma = 0.5) {
@@ -119,17 +118,16 @@ obj_gcoda <- function(iSig, A, lambda) {
 #----------------------------------------
 # Modified huge::huge.glasso for quick preparation
 # Input S must be covariance matrix
-require(huge);
 huge_glasso_mod <- function(S, lambda) {
     icov <- diag(1/(diag(S) + lambda));
 
     z <- which(rowSums(abs(S) > lambda) > 1);
     q <- length(z);
     if (q > 0) {
-        out.glasso = .C("hugeglasso", S = as.double(S[z, z]), 
-                        W = as.double(S[z, z]), T = as.double(diag(q)), 
-                        dd = as.integer(q), lambda = as.double(lambda), 
-                        df = as.integer(0), PACKAGE = "huge");
+        out.glasso = .Call("_huge_hugeglasso", 
+                           S[z, z], lambda, 
+                           FALSE, FALSE, FALSE,
+                           PACKAGE = "huge");
         icov[z, z] = matrix(out.glasso$T, ncol = q);
     }
 
